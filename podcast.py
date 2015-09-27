@@ -1,5 +1,8 @@
 '''
-Script to download podcast information from RSS feed URLs. Currently pulls descriptions and itunes category.
+Karl Shiffler 
+karlshiffler@gmail.com
+
+Script to download podcast information from RSS feed URLs. Currently pulls series title, episode title, description.
 '''
 import feedparser
 import csv
@@ -10,45 +13,16 @@ import simplejson as json
 
 feeds = []
 
+# Read in from list of URLs 
 with open('RSS-Feeds_Karl.csv', 'rb') as f: 
 	reader = csv.reader(f, delimiter=',')
 	next(reader, None)
 	for row in reader:
 		# print row
 		feeds.append(row[2])
-
-# print feeds
-i = 0
-for link in feeds:
-	response = requests.get(link)
-	json = response.text.encode('utf-8')
-	soup = BeautifulSoup(json)
-	a = soup.find("itunes:category")
-	print link
-	if a is not None:
-		print a['text']
-	else:
-		i = i+1
-		print i
-	# pod = feedparser.parse(link)
-	# j = str(pod)
-	# # print pod
-	# j = re.sub(r"{\s*'?(\w)", r'{"\1', j)
-	# j = re.sub(r",\s*'?(\w)", r',"\1', j)
-	# j = re.sub(r"(\w)'?\s*:", r'\1":', j)
-	# j = re.sub(r":\s*'(\w+)'\s*([,}])", r':"\1"\2', j)
-	# print j
-	# x = json.loads(j)
-	# print json.dumps(x, indent=2)
-	# for i in range(len(pod.entries)):
-		# print str(pod.entries[i])
-		# x = json.loads(str(pod.entries[i]))
-		# print json.dumps(x, indent=2)
-		# print pod.entries[i]
-		# print "------------------------------------\n"
 	
 	
-'''
+# Write results to file
 with open('summaryData.csv','wb') as out:
 	sw = csv.writer(out, delimiter=',')
 	sw.writerow(['provider', 'episode', 'summary'])
@@ -84,4 +58,4 @@ with open('summaryData.csv','wb') as out:
 			print data
 			print "\n----------------------------------------------------------------------\n"
 			sw.writerow([provider,episode,data])
-'''
+

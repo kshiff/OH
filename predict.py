@@ -1,3 +1,9 @@
+'''
+Karl Shiffler 
+karlshiffler@gmail.com
+
+Script takes an episode index as input and outputs desired number of recommendations.
+'''
 import csv
 import cPickle as pickle
 import scipy.sparse.linalg as linalg
@@ -9,6 +15,7 @@ import seaborn as sns
 from sklearn.metrics.pairwise import pairwise_distances as pairDist
 import operator
 
+# read in data
 episode = []
 data = []
 with open('episodeTopicData.csv','rb') as infile:
@@ -18,35 +25,29 @@ with open('episodeTopicData.csv','rb') as infile:
 		episode.append(row[0])
 		data.append(row[1:])
 
-# print episode[133]
-# 133
-# 2510
-# 4883
-# 473
-# 994
-ind = 153
-target = data[ind] #data[133]
+
+ind = 20177 #index of episode you want predictions for
+			#could change this to be an argument of the script
+			#allowing for calls to specific episodes 
+
+target = data[ind] 
 print episode[ind]
 
 D = pairDist(target, data)
 Dt = D.transpose()
 
-m = .5
+m = .5 	# upper limit for most dissimlar episodes you'll include
+		# this step could probably be removed
 results = []
 for i in range(len(Dt)):
 	if Dt[i] <= m:
 		results.append([Dt[i], episode[i], i])
 
-numR = 30
-ordered = sorted(results)#, key=lambda result: results[1])
-# results.sort()
+numR = 30 #number of recommendations you want
+ordered = sorted(results)
+
+#print ordered results
 for i in range(numR):
 	print ordered[i]
 	if i == 0:
 		standard = data[ordered[i][2]]
-	# else:	
-		# for x in range(len(data[ordered[i][2]])):
-			# print (float(standard[x]) - float(data[ordered[i][2]][x]))
-
-
-# print len(ordered)

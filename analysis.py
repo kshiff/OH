@@ -1,3 +1,10 @@
+'''
+Karl Shiffler 
+karlshiffler@gmail.com
+
+Script stems and vectorizes descriptions, then computes SVD and outputs feature vectors. 
+'''
+
 from sklearn.feature_extraction.text import TfidfVectorizer 
 from nltk.stem.snowball import SnowballStemmer
 from nltk.tokenize import word_tokenize, sent_tokenize
@@ -10,6 +17,7 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 import gensim
+from gensim.parsing.preprocessing import STOPWORDS
 
 data = []
 titles = []
@@ -21,66 +29,59 @@ with open('summaryData.csv','rb') as infile:
 		titles.append(row[0] + " - " + row[1])
 		data.append(row[2])
 
-# print type(data)
-# print type(data[0])
-
-
-
-
 
 ### STEM AND VECTORIZE
 ### STOPWORD REMOVAL
+# I stem the data once and save it as a pickle object, allowing me to play around with different
+# SVD computations without restemming each time.
 
+### comment these three lines after the first time you run it
+stemmed_data = [list(gensim.utils.lemmatize(desc, stopwords=STOPWORDS))
+	for desc in data]
+pickle.dump(stemmed_data, open("stemmed_data.pckl", "wb"))
 
-# stemmed_data = [" ".join(SnowballStemmer("english", ignore_stopwords=True).stem(word)  
-#          for sent in sent_tokenize(desc)
-#          for word in word_tokenize(sent))
-#          for desc in data]
+### uncomment this line after the first time you run it to save computation time 
+### for subsequent runs
+# stemmed_data = pickle.load(open("stemmed_data.pckl", "rb"))
 
-# pickle.dump(stemmed_data, open("stemmed_data.pckl", "wb"))
+def iter_desc(x):
+	for y in range(len(stemmed_data[x])):
+		yield stemmed_data[x][y]
 
+list_data = []
 
-stemmed_data = pickle.load(open("stemmed_data.pckl", "rb"))
+for p in range(len(stemmed_data)):
+	list_data.append(" ".join(iter_desc(p)))
 
-print stemmed_data[0]
-
-
+# vectorizes descriptions
 vectorizer = TfidfVectorizer(stop_words='english', min_df=0.0,max_df=0.09, ngram_range=(1,2))
-vectors = vectorizer.fit_transform(stemmed_data)
-
-print vectors[0]
-
-# print (vectorizer.get_feature_names()[281])
+vectors = vectorizer.fit_transform(list_data)
 
 
 
 
+### COMPUTING SVD
 
-
-
-
-
-
-
-
-
-k = 50
+k = 50 #desired number of features in target vector
 U,s,V = linalg.svds(vectors,k,which='LM')
 print U.shape, V.shape, s.shape
 print s[::-1]
 
 Xk = U*sp.sparse.diags(s,0)
 
-print Xk[]
+print Xk[0]
 
 # print V.shape	
 # print V[:,0]
 # print V.shape[1]
 
-plt.plot(s)
-plt.show()
+# plt.plot(s)
+# plt.show()
 
-'''
+
+
+### SAVING OUTPUT
+
 with open('topicWordData.csv','wb') as out:
 	sw = csv.writer(out, delimiter=',')
 	sw.writerow(vectorizer.get_feature_names())
@@ -96,5 +97,4 @@ with open('episodeTopicData.csv','wb') as out:
 		data = [titles[i]]
 		for x in range(Xk.shape[1]):
 			data.append(Xk[i,x])
-		sw.writerow(data) #[titles[i], Xk[i,0], Xk[i,1], Xk[i,2], Xk[i,3], Xk[i,4], Xk[i,5], Xk[i,6]])
-'''
+		sw.writerow(data) 
