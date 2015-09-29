@@ -1,2 +1,0 @@
-check for duplicates
-make sure it's an RSS feed, not just a website
