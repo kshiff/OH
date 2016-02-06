@@ -25,29 +25,36 @@ with open('episodeTopicData.csv','rb') as infile:
 		episode.append(row[0])
 		data.append(row[1:])
 
+avg_list = []
+for x in range(0, 177):
+	ind = x #20177  #index of episode you want predictions for
+				#need to change this to be an argument of the script
 
-ind = 20177 #index of episode you want predictions for
-			#could change this to be an argument of the script
-			#allowing for calls to specific episodes 
+	target = data[ind] 
+	print episode[ind]
 
-target = data[ind] 
-print episode[ind]
+	D = pairDist(target, data)
+	Dt = D.transpose()
 
-D = pairDist(target, data)
-Dt = D.transpose()
+	m = .5 	# upper limit for most dissimlar episodes you'll include
+			# this step could probably be removed
+	results = []
+	for i in range(len(Dt)):
+		if Dt[i] <= m:
+			results.append([Dt[i], episode[i], i])
 
-m = .5 	# upper limit for most dissimlar episodes you'll include
-		# this step could probably be removed
-results = []
-for i in range(len(Dt)):
-	if Dt[i] <= m:
-		results.append([Dt[i], episode[i], i])
+	numR = 5 #number of recommendations you want
+	ordered = sorted(results)
 
-numR = 30 #number of recommendations you want
-ordered = sorted(results)
+	#print ordered results
 
-#print ordered results
-for i in range(numR):
-	print ordered[i]
-	if i == 0:
-		standard = data[ordered[i][2]]
+	l1 = []
+	for i in range(numR):
+		l1.append(ordered[i][0][0])
+		#print ordered[i][0][0], ordered[i][1:]
+		if i == 0:
+			standard = data[ordered[i][2]]
+
+	avg_list.append(np.average(l1))
+
+print 'Total average = ' + str(np.average(avg_list))

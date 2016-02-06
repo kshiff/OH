@@ -36,33 +36,41 @@ with open('summaryData.csv','rb') as infile:
 # SVD computations without restemming each time.
 
 ### comment these three lines after the first time you run it
-stemmed_data = [list(gensim.utils.lemmatize(desc, stopwords=STOPWORDS))
-	for desc in data]
-pickle.dump(stemmed_data, open("stemmed_data.pckl", "wb"))
+# stemmed_data = [list(gensim.utils.lemmatize(desc, stopwords=STOPWORDS))
+# 	for desc in data]
+# pickle.dump(stemmed_data, open("stemmed_data.pckl", "wb"))
 
 ### uncomment this line after the first time you run it to save computation time 
 ### for subsequent runs
-# stemmed_data = pickle.load(open("stemmed_data.pckl", "rb"))
+stemmed_data = pickle.load(open("stemmed_data.pckl", "rb"))
 
 def iter_desc(x):
 	for y in range(len(stemmed_data[x])):
-		yield stemmed_data[x][y]
+		edited = stemmed_data[x][y].split("/")[0]
+		yield edited #stemmed_data[x][y]
+
+
 
 list_data = []
 
 for p in range(len(stemmed_data)):
 	list_data.append(" ".join(iter_desc(p)))
 
+
+
 # vectorizes descriptions
-vectorizer = TfidfVectorizer(stop_words='english', min_df=0.0,max_df=0.09, ngram_range=(1,2))
+vectorizer = TfidfVectorizer(stop_words='english', min_df=0.0003,max_df=0.09, ngram_range=(1,2))
 vectors = vectorizer.fit_transform(list_data)
 
+feature_names = vectorizer.get_feature_names()
 
 
+
+# print type(vectors)
 
 ### COMPUTING SVD
 
-k = 50 #desired number of features in target vector
+k = 7 #desired number of features in target vector
 U,s,V = linalg.svds(vectors,k,which='LM')
 print U.shape, V.shape, s.shape
 print s[::-1]
