@@ -27,12 +27,25 @@ def intakeFile(filename):
 	with open(filename, 'rb') as f: 
 		reader = csv.reader(f, delimiter=',')
 		next(reader, None)
-		for row in reader:
-			feeds.append(row[2])
+		for row in tqdm(reader):
+			if row[3] != 'None':
+				feeds.append(row[3])
+			else:
+				feeds.append(row[2])
 	return feeds	
 	
-# Write results to file
+
 def writeData(outfile, feeds):
+	'''
+	Parses RSS feeds and writes results to file.
+
+	Args:
+		outfile (str): name of file to write data to 
+		feeds (list): list of URLs to podcasts' RSS feeds
+
+	Returns:
+		None
+	'''
 	errors = []
 	with open(outfile,'wb') as out:
 		sw = csv.writer(out, delimiter=',')
@@ -76,10 +89,13 @@ def writeData(outfile, feeds):
 			except AttributeError:
 				errors.append([pod.feed, link])
 	print 'Encountered ' + str(len(errors)) + ' errors in this list.'
+	for c in range(len(errors)):
+		print errors[c]
 
 
 def main(argv):
-	parser = argparse.ArgumentParser(description='Commandline python script that allows reading list of podcast URLs and generating a file containing desciptive data')
+	desc = 'Commandline python script that allows reading list of podcast URLs and generating a file containing desciptive data'
+	parser = argparse.ArgumentParser(description=desc)
 	parser.add_argument('podfile', type=str, help='filename of the podfile')
 	parser.add_argument('--output', '-o', type=str, help='filename the podcast data will be output to')
 
